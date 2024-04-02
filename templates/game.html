@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Game</title>
+    </head>
+
+    <body>
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+
+            <li>{{ previous_question }}</li>
+        </ul>
+
+        <form action="/send_answer" method="POST">
+            <label for="answer">Co robisz?</label>
+
+            <input type="text" id="answer" name="answer" autocomplete="off">
+            
+            <br>
+
+            <input type="submit" value="Send"><br>
+        </form>
+    </body>
+</html>
