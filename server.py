@@ -33,6 +33,23 @@ def init_mongo():
     return mongo
 
 
+def get_data_document():
+    session_id = flask.session.get("session_id")
+
+    document = collection.find_one({"_id": session_id})
+
+    return document
+
+
+def add_to_database(new_object):
+    session_id = flask.session.get("session_id")
+
+    query = {"_id": session_id}
+    new_element = {"$push": {"data": new_object}}
+
+    collection.update_one(query, new_element)
+
+
 def init_first_data():
     session_id = flask.session.get("session_id")
 
@@ -44,21 +61,18 @@ def init_first_data():
         {"_id": session_id}, {"$setOnInsert": {"data": []}}, upsert=True
     )
 
-    document = collection.find_one({"_id": session_id})
-
-    return document
-
 
 @app.route("/")
 def index():
     global openai
     openai = api.Api()
 
-    document = init_first_data()
-    messages = document["data"]
+    init_first_data()
+    document = get_data_document()
+    data = document["data"]
 
-    if len(messages) == 0:
-        previous_question = openai.init_assistant(messages)
+    if len(data) == 0:
+        previous_question = openai.init_assistant(data)
 
         flask.session["previous_question"] = previous_question
 
@@ -68,10 +82,20 @@ def index():
 @app.route("/game")
 def game():
     previous_question = flask.session.get("previous_question", "")
-    tale = flask.session.get("tale", [])
+
+    document = get_data_document()
+    data = document["data"]
+
+    data = map(
+        lambda data_object: {
+            "question": data_object["question"].replace("\n", "<br>"),
+            "answer": data_object["answer"],
+        },
+        data,
+    )
 
     return flask.render_template(
-        "game.html", messages=tale, previous_question=previous_question
+        "game.html", messages=data, previous_question=previous_question
     )
 
 
@@ -80,10 +104,10 @@ def send_answer():
     question = flask.session.get("previous_question", "")
     answer = flask.request.form.get("answer", "")
 
-    new_tale = flask.session.get("tale", []).append(
-        {"question": question, "answer": answer}
-    )
-    flask.session["tale"] = new_tale
+    db_question = question.replace("<br>", "\n")
+
+    new_object = {"question": db_question, "answer": answer}
+    add_to_database(new_object)
 
     response = openai.send_answer(answer)
 

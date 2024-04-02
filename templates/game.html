@@ -2,12 +2,45 @@
 <html>
     <head>
         <title>Game</title>
+
+        <style>
+            .dialogue {
+                margin: 20px;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                background-color: #f9f9f9;
+            }
+
+            .answer {
+                font-weight: bold;
+                margin-left: 40px;
+                margin-top: 25px;
+                margin-bottom: 25px;
+            }
+
+            ul {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            li {
+                margin-left: 10px;
+            }
+        </style>
     </head>
 
     <body>
-        <ul>
+        <ul class="dialogue">
             {% for message in messages %}
-            <li>{{ message }}</li>
+                <li>
+                    {{ message.question | safe }}
+                </li>
+
+                <li class="answer">
+                    {{ message.answer }}
+                </li>
             {% endfor %}
 
             <li>{{ previous_question }}</li>

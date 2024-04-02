@@ -22,7 +22,7 @@ class Api:
 
         self.assistant = self.client.beta.assistants.create(
             name="Storyteller",
-            instructions="Jesteś polskim kreatywnym powieściopisarzem. Wymyśl dla użytkownika jakąś historię, która będzię się kończyła akcją możliwą do wykonania przez gracza, następnie na podstawie odpowiedzi użytkownika kontynuuj dalej tę historię",
+            instructions="Jesteś polskim kreatywnym powieściopisarzem. Wymyśl dla użytkownika jakąś historię, która będzię się kończyła akcją możliwą do wykonania przez gracza, następnie na podstawie odpowiedzi użytkownika kontynuuj dalej tę historię. Staraj się dzielić swoje wypowiedzi na akapity",
             model="gpt-3.5-turbo",
         )
 
