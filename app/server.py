@@ -1,8 +1,7 @@
-import flask
-import flask_session
-
 import api
 import database
+import flask
+import flask_session
 
 app = flask.Flask("__name__")
 collection = None
@@ -76,4 +75,4 @@ if __name__ == "__main__":
     mongo = database.init_mongo()
     init_app(mongo)
 
-    app.run(debug=True)
+    app.run(port=4000)
