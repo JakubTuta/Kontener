@@ -8,7 +8,7 @@ collection = None
 
 
 def init_mongo():
-    uri = f"mongodb://admin:password@localhost:27017"
+    uri = f"mongodb://admin:password@mongodb"
 
     mongo = MongoClient(uri, server_api=ServerApi("1"))
 

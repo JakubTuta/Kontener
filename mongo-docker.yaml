@@ -7,6 +7,8 @@ services:
         environment:
             - MONGO_INITDB_ROOT_USERNAME=admin
             - MONGO_INITDB_ROOT_PASSWORD=password
+        volumes:
+            - mongodb-data:/data/db
     
     mongo-express:
         image: mongo-express
@@ -20,4 +22,10 @@ services:
             - ME_CONFIG_BASICAUTH_PASSWORD=password
     
     gierka:
-        image: gierka:1.0
+        image: 992382713357.dkr.ecr.eu-north-1.amazonaws.com/gierka:1.0
+        ports:
+            - 4000:4000
+
+volumes:
+    mongodb-data:
+        driver: local
