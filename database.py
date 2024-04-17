@@ -1,4 +1,3 @@
-import json
 import uuid
 
 import flask
@@ -9,10 +8,7 @@ collection = None
 
 
 def init_mongo():
-    with open("./mongodb_data.json", "r") as file:
-        mongodb_project_data = json.load(file)
-
-    uri = f"mongodb+srv://{mongodb_project_data['username']}:{mongodb_project_data['password']}@{mongodb_project_data['project_name']}.7zgayam.mongodb.net/?retryWrites=true&w=majority&appName={mongodb_project_data['project_name']}"
+    uri = f"mongodb://admin:password@localhost:27017"
 
     mongo = MongoClient(uri, server_api=ServerApi("1"))
 
