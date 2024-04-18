@@ -2,16 +2,6 @@ import time
 
 import openai
 
-# completion = client.chat.completions.create(
-#     model="gpt-3.5-turbo",
-#     messages=[
-#         {
-#             "role": "system",
-#             "content": "Jesteś polskim kreatywnym powieściopisarzem. Wymyśl dla użytkownika jakąś historię, która będzię się kończyła akcją możliwą do wykonania przez gracza, następnie na podstawie odpowiedzi użytkownika kontynuuj dalej tę historię",
-#         },
-#     ],
-# )
-
 
 class Api:
     def __init__(self):
@@ -56,7 +46,7 @@ class Api:
         )
 
         while run.status in ["queued", "in_progress", "cancelling"]:
-            time.sleep(0.5)
+            time.sleep(0.1)
             run = self.client.beta.threads.runs.retrieve(
                 thread_id=self.thread.id,
                 run_id=run.id,
