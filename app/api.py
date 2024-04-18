@@ -1,6 +1,9 @@
 import time
 
+import flask
 import openai
+
+app = flask.Flask("__main__")
 
 
 class Api:

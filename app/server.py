@@ -1,3 +1,5 @@
+import uuid
+
 import api
 import flask
 import flask_session
@@ -7,7 +9,7 @@ from pymongo.server_api import ServerApi
 
 app = flask.Flask("__name__", template_folder="app/templates")
 openai = None
-database_server_base_url = "http://localhost:4001"
+database_base_url = "http://localhost:4001"
 
 
 def init_sessions(mongo):
@@ -28,7 +30,12 @@ def get_mongo_client():
 
 
 def init_mongo():
-    response = requests.get(f"{database_server_base_url}/init-mongo")
+    session_id = flask.session.get("session_id")
+
+    response = requests.post(
+        f"{database_base_url}/init-mongo",
+        json={"doc_id": session_id},
+    )
 
     if response.status_code == 200:
         print("Mongo initialized")
@@ -37,7 +44,12 @@ def init_mongo():
 
 
 def get_messages():
-    response = requests.get(f"{database_server_base_url}/get-messages")
+    session_id = flask.session.get("session_id")
+
+    response = requests.post(
+        f"{database_base_url}/get-messages",
+        json={"doc_id": session_id},
+    )
 
     messages = []
 
@@ -52,14 +64,29 @@ def get_messages():
 
 
 def save_message_in_database(question, answer):
+    session_id = flask.session.get("session_id")
+
     db_question = question.replace("<br>", "\n")
     new_message = {"question": db_question, "answer": answer}
 
-    requests.post(f"{database_server_base_url}/push-to-mongo", new_message)
+    requests.post(
+        f"{database_base_url}/push-to-mongo",
+        json={"message": new_message, "doc_id": session_id},
+    )
+
+
+def set_session_id():
+    session_id = flask.session.get("session_id")
+
+    if not session_id:
+        session_id = str(uuid.uuid4())
+        flask.session["session_id"] = session_id
 
 
 @app.route("/")
 def index():
+    set_session_id()
+
     global openai
     openai = api.Api()
 
