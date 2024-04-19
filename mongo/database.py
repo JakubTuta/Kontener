@@ -8,7 +8,7 @@ app = flask.Flask("__name__")
 
 
 def set_mongo_client():
-    uri = f"mongodb://admin:password@localhost:27017"
+    uri = f"mongodb://admin:password@mongodb"
 
     mongo = MongoClient(uri, server_api=ServerApi("1"))
 
@@ -70,4 +70,4 @@ def push_to_mongo():
 if __name__ == "__main__":
     set_mongo_client()
 
-    app.run(port=4001)
+    app.run(port=4001, host="0.0.0.0")

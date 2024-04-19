@@ -7,9 +7,9 @@ import requests
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
-app = flask.Flask("__name__", template_folder="app/templates")
+app = flask.Flask("__name__", template_folder="home/app/templates")
 openai = None
-database_base_url = "http://localhost:4001"
+database_base_url = "http://gierka-mongo:4001"
 
 
 def init_sessions(mongo):
@@ -22,7 +22,7 @@ def init_sessions(mongo):
 
 
 def get_mongo_client():
-    uri = f"mongodb://admin:password@localhost:27017"
+    uri = f"mongodb://admin:password@mongodb"
 
     mongo = MongoClient(uri, server_api=ServerApi("1"))
 
@@ -138,4 +138,4 @@ if __name__ == "__main__":
     mongo = get_mongo_client()
     init_sessions(mongo)
 
-    app.run(port=4000)
+    app.run(port=4000, host="0.0.0.0")
