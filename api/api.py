@@ -4,13 +4,13 @@ import flask
 import openai
 
 app = flask.Flask("__main__")
+assistants = {}
 
 
 class Api:
-    def __init__(self):
+    def __init__(self, messages):
         self.client = openai.OpenAI()
 
-    def init_assistant(self, messages):
         messages = self.__prepare_messages(messages)
 
         self.assistant = self.client.beta.assistants.create(
@@ -20,16 +20,6 @@ class Api:
         )
 
         self.thread = self.client.beta.threads.create(messages=messages)
-
-        message = self.client.beta.threads.messages.create(
-            thread_id=self.thread.id,
-            role="user",
-            content="Rozpocznij opowieść",
-        )
-
-        response = self.__wait_for_response(message)
-
-        return response
 
     def send_answer(self, answer):
         message = self.client.beta.threads.messages.create(
@@ -71,3 +61,37 @@ class Api:
                 formatted_messages.append({"role": role, "content": value})
 
         return formatted_messages
+
+
+@app.route("/init-assistant", methods=["POST"])
+def init_assistant():
+    data = flask.request.get_json(force=True)
+    session_id = data["session_id"]
+    messages = data["messages"]
+
+    assistant = Api(messages)
+    assistants[session_id] = assistant
+
+    if len(messages) == 0:
+        question = assistant.send_answer("Rozpocznij opowieść")
+
+        return flask.Response(question, 202)
+
+    return flask.Response("OK", 200)
+
+
+@app.route("/send-answer", methods=["POST"])
+def get_new_question():
+    data = flask.request.get_json(force=True)
+    session_id = data["session_id"]
+    answer = data["answer"]
+
+    assistant = assistants[session_id]
+
+    question = assistant.send_answer(answer)
+
+    return flask.Response(question, 200)
+
+
+if __name__ == "__main__":
+    app.run(port=4002, host="0.0.0.0")

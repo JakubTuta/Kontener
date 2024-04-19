@@ -1,6 +1,5 @@
 import uuid
 
-import api
 import flask
 import flask_session
 import requests
@@ -8,8 +7,8 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
 app = flask.Flask("__name__", template_folder="home/app/templates")
-openai = None
 database_base_url = "http://gierka-mongo:4001"
+api_base_url = "http://gierka-api:4002"
 
 
 def init_sessions(mongo):
@@ -83,21 +82,39 @@ def set_session_id():
         flask.session["session_id"] = session_id
 
 
+def init_assistant(messages):
+    session_id = flask.session.get("session_id")
+
+    response = requests.post(
+        f"{api_base_url}/init-assistant",
+        json={"session_id": session_id, "messages": messages},
+    )
+
+    if response.status_code == 202:
+        question = response.text
+        flask.session["previous_question"] = question
+
+
+def get_new_question(answer):
+    session_id = flask.session.get("session_id")
+
+    response = requests.post(
+        f"{api_base_url}/send-answer",
+        json={"session_id": session_id, "answer": answer},
+    )
+
+    question = response.text
+
+    return question
+
+
 @app.route("/")
 def index():
     set_session_id()
-
-    global openai
-    openai = api.Api()
-
     init_mongo()
 
     messages = get_messages()
-
-    if len(messages) == 0:
-        previous_question = openai.init_assistant(messages)
-
-        flask.session["previous_question"] = previous_question
+    init_assistant(messages)
 
     return flask.redirect("/game")
 
@@ -128,7 +145,7 @@ def send_answer():
 
     save_message_in_database(question, answer)
 
-    new_question = openai.send_answer(answer)
+    new_question = get_new_question(answer)
     flask.session["previous_question"] = new_question
 
     return flask.redirect("/game")
