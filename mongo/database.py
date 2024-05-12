@@ -2,7 +2,7 @@ import flask
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
-collection = None
+collections = {}
 
 app = flask.Flask("__name__")
 
@@ -12,8 +12,67 @@ def set_mongo_client():
 
     mongo = MongoClient(uri, server_api=ServerApi("1"))
 
-    global collection
-    collection = mongo.gierka.session_data
+    collections["session_data"] = mongo.gierka.session_data
+    collections["auth"] = mongo.gierka.auth
+
+
+def find_user(username):
+    query = {"username": username}
+    document = collections["auth"].find_one(query)
+
+    return document
+
+
+def create_new_user(username, password):
+    collections["auth"].insert_one(
+        {
+            "username": username,
+            "password": password,
+        }
+    )
+
+
+@app.route("/register", methods=["POST"])
+def register():
+    try:
+        data = flask.request.get_json(force=True)
+
+        username = data["username"]
+        password = data["password"]
+
+    except:
+        return "Error", 400
+
+    user = find_user(username)
+
+    if user:
+        return "Error", 400
+
+    create_new_user(username, password)
+
+    return "Ok", 200
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    try:
+        data = flask.request.get_json(force=True)
+
+        username = data["username"]
+        password = data["password"]
+
+    except:
+        return "Error", 400
+
+    user = find_user(username)
+
+    if not user:
+        return "Error", 400
+
+    if user["password"] != password:
+        return "Error", 400
+
+    return "Ok", 200
 
 
 @app.route("/init-mongo", methods=["POST"])
@@ -22,7 +81,7 @@ def init_mongo():
         data = flask.request.get_json(force=True)
         doc_id = data["doc_id"]
 
-        collection.update_one(
+        collections["session_data"].update_one(
             {"_id": doc_id}, {"$setOnInsert": {"data": []}}, upsert=True
         )
 
@@ -38,7 +97,7 @@ def get_messages():
         data = flask.request.get_json(force=True)
         doc_id = data["doc_id"]
 
-        document = collection.find_one({"_id": doc_id})
+        document = collections["session_data"].find_one({"_id": doc_id})
 
         messages = document["data"]
 
@@ -59,7 +118,7 @@ def push_to_mongo():
         query = {"_id": data["doc_id"]}
         new_element = {"$push": {"data": data["message"]}}
 
-        collection.update_one(query, new_element)
+        collections["session_data"].update_one(query, new_element)
 
         return "OK", 200
 
