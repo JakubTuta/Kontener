@@ -2,6 +2,12 @@
 <html>
     <head>
         <title>Register</title>
+
+        <script>
+            function goBack() {
+                window.location.href = "/"
+            }
+        </script>
     </head>
 
     <body>
@@ -12,7 +18,11 @@
             <label for="password">Password:</label>
             <input type="password" id="password" name="password"><br><br>
 
-            <input type="submit" value="Login">
+            <input type="submit" value="Register">
         </form>
+
+        <button onclick="goBack()">
+            Go back
+        </button>
     </body>
 </html>
