@@ -157,6 +157,8 @@ def login():
     if flask.request.method == "POST" and has_logged_in():
         flask.session["is_logged_in"] = True
 
+        return flask.redirect("/")
+
     return flask.render_template("login.html")
 
 
@@ -165,7 +167,16 @@ def register():
     if flask.request.method == "POST" and has_registered():
         flask.session["is_logged_in"] = True
 
+        return flask.redirect("/")
+
     return flask.render_template("register.html")
+
+
+@app.route("/logout")
+def logout():
+    flask.session["is_logged_in"] = False
+
+    return flask.redirect("/")
 
 
 @app.route("/game")
