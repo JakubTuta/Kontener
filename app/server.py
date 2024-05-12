@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 import flask
@@ -16,6 +17,7 @@ def init_sessions(mongo):
     app.config["SESSION_MONGODB"] = mongo
     app.config["SESSION_MONGODB_DB"] = "gierka"
     app.config["SESSION_MONGODB_COLLECT"] = "sessions"
+    app.permament_session_lifetime = datetime.timedelta(hours=1)
 
     flask_session.Session(app)
 
@@ -108,6 +110,34 @@ def get_new_question(answer):
     return question
 
 
+def has_logged_in():
+    username = flask.request.form.get("username", "admin")
+    password = flask.request.form.get("password", "password")
+
+    response = requests.post(
+        f"{database_base_url}/login",
+        json={"username": username, "password": password},
+    )
+
+    if response.ok:
+        return True
+    return False
+
+
+def has_registered():
+    username = flask.request.form.get("username", "admin")
+    password = flask.request.form.get("password", "password")
+
+    response = requests.post(
+        f"{database_base_url}/register",
+        json={"username": username, "password": password},
+    )
+
+    if response.ok:
+        return True
+    return False
+
+
 @app.route("/")
 def index():
     set_session_id()
@@ -116,7 +146,26 @@ def index():
     messages = get_messages()
     init_assistant(messages)
 
-    return flask.redirect("/game")
+    if flask.session.get("is_logged_in", False):
+        return flask.redirect("/game")
+
+    return flask.render_template("index.html")
+
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if flask.request.method == "POST" and has_logged_in():
+        flask.session["is_logged_in"] = True
+
+    return flask.render_template("login.html")
+
+
+@app.route("/register", methods=["POST", "GET"])
+def register():
+    if flask.request.method == "POST" and has_registered():
+        flask.session["is_logged_in"] = True
+
+    return flask.render_template("register.html")
 
 
 @app.route("/game")
