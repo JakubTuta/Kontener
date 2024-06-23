@@ -53,7 +53,7 @@
                 </li>
             {% endfor %}
 
-            <li>{{ previous_question }}</li>
+            <li>{{ previous_question | safe }}</li>
         </ul>
 
         <form action="/send_answer" method="POST">
@@ -69,13 +69,13 @@
         <br>
 
         <button onclick="reset()">
-            Reset game
+            Zresetuj grę
         </button>
 
         <br>
 
         <button onclick="logout()">
-            Log out
+            Wyloguj się
         </button>
     </body>
 </html>
