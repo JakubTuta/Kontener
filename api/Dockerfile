@@ -1,6 +1,6 @@
 FROM python
 
-ENV OPENAI_API_KEY ${OPENAI_API_KEY}
+ENV OPENAI_API_KEY sk-proj-3is3ZkWDCHnRf1D7WcL0T3BlbkFJVIuhLeMKsV0YVnK5rASP
 
 RUN mkdir -p /home/app
 

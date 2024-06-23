@@ -22,17 +22,17 @@ services:
       - ME_CONFIG_BASICAUTH_PASSWORD=password
 
   gierka:
-    image: 992382713357.dkr.ecr.eu-north-1.amazonaws.com/gierka:latest
+    image: 891377250379.dkr.ecr.us-east-1.amazonaws.com/kontener_backend:latest
     ports:
       - 4000:4000
 
   gierka-mongo:
-    image: 992382713357.dkr.ecr.eu-north-1.amazonaws.com/gierka-mongo:latest
+    image: 891377250379.dkr.ecr.us-east-1.amazonaws.com/kontener_mongo:latest
     ports:
       - 4001:4001
 
   gierka-api:
-    image: 992382713357.dkr.ecr.eu-north-1.amazonaws.com/gierka-api:latest
+    image: 891377250379.dkr.ecr.us-east-1.amazonaws.com/kontener_api:latest
     ports:
       - 4002:4002
 
