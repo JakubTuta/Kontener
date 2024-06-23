@@ -110,6 +110,19 @@ def get_messages():
         return "Error", 400
 
 
+@app.route("/clear-messages", methods=["POST"])
+def clear_messages():
+    try:
+        data = flask.request.get_json(force=True)
+        doc_id = data["doc_id"]
+
+        collections["session_data"].update_one({"_id": doc_id}, {"$set": {"data": []}})
+        return "OK", 200
+
+    except:
+        return "Error", 400
+
+
 @app.route("/push-to-mongo", methods=["POST"])
 def push_to_mongo():
     try:

@@ -17,7 +17,7 @@ def init_sessions(mongo):
     app.config["SESSION_MONGODB"] = mongo
     app.config["SESSION_MONGODB_DB"] = "gierka"
     app.config["SESSION_MONGODB_COLLECT"] = "sessions"
-    app.permanent_session_lifetime = datetime.timedelta(hours=1)
+    app.permanent_session_lifetime = datetime.timedelta(days=7)
 
     flask_session.Session(app)
 
@@ -64,6 +64,20 @@ def get_messages():
     return messages
 
 
+def clear_messages():
+    session_id = flask.session.get("session_id")
+
+    response = requests.post(
+        f"{database_base_url}/clear-messages",
+        json={"doc_id": session_id},
+    )
+
+    if response.status_code == 200:
+        print("Messages cleared")
+    else:
+        print("Error while clearing messages")
+
+
 def save_message_in_database(question, answer):
     session_id = flask.session.get("session_id")
 
@@ -95,6 +109,21 @@ def init_assistant(messages):
     if response.status_code == 202:
         question = response.text
         flask.session["previous_question"] = question
+
+
+def drop_assistant():
+    session_id = flask.session.get("session_id")
+
+    response = requests.post(
+        f"{api_base_url}/drop-assistant",
+        json={"session_id": session_id},
+    )
+
+    if response.ok:
+        flask.session["previous_question"] = ""
+        print("Assistant dropped")
+    else:
+        print("Error while dropping assistant")
 
 
 def get_new_question(answer):
@@ -209,6 +238,16 @@ def send_answer():
     flask.session["previous_question"] = new_question
 
     return flask.redirect("/game")
+
+
+@app.route("/reset", methods=["GET"])
+def reset():
+    drop_assistant()
+    clear_messages()
+
+    init_assistant([])
+
+    return flask.redirect("/")
 
 
 if __name__ == "__main__":

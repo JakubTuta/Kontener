@@ -80,6 +80,17 @@ def init_assistant():
     return flask.Response("OK", 200)
 
 
+@app.route("/drop-assistant", methods=["POST"])
+def drop_assistant():
+    data = flask.request.get_json(force=True)
+    session_id = data["session_id"]
+
+    if assistants.get(session_id):
+        del assistants[session_id]
+
+    return flask.Response("OK", 200)
+
+
 @app.route("/send-answer", methods=["POST"])
 def get_new_question():
     data = flask.request.get_json(force=True)
