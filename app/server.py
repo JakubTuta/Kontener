@@ -167,6 +167,10 @@ def has_registered():
     return False
 
 
+def is_logged_in():
+    return flask.session.get("is_logged_in", False)
+
+
 @app.route("/")
 def index():
     set_session_id()
@@ -175,7 +179,7 @@ def index():
     messages = get_messages()
     init_assistant(messages)
 
-    if flask.session.get("is_logged_in", False):
+    if is_logged_in():
         return flask.redirect("/game")
 
     return flask.render_template("index.html")
@@ -203,6 +207,9 @@ def register():
 
 @app.route("/logout")
 def logout():
+    if not is_logged_in():
+        return flask.redirect("/")
+
     flask.session["is_logged_in"] = False
 
     return flask.redirect("/")
@@ -210,6 +217,9 @@ def logout():
 
 @app.route("/game")
 def game():
+    if not is_logged_in():
+        return flask.redirect("/")
+
     previous_question = flask.session.get("previous_question", "")
 
     messages = get_messages()
@@ -229,6 +239,9 @@ def game():
 
 @app.route("/send_answer", methods=["POST"])
 def send_answer():
+    if not is_logged_in():
+        return flask.redirect("/")
+
     question = flask.session.get("previous_question", "")
     answer = flask.request.form.get("answer", "")
 
@@ -242,6 +255,9 @@ def send_answer():
 
 @app.route("/reset", methods=["GET"])
 def reset():
+    if not is_logged_in():
+        return flask.redirect("/")
+
     drop_assistant()
     clear_messages()
 
